@@ -10,7 +10,40 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL")
+  url = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
-  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  purchases Purchase[]
+}
+
+model Account {
+  id                Int    @id @default(autoincrement())
+  userId            Int
+  provider          String
+  providerAccountId String
+  user              User   @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  expires     DateTime
+  sessionToken String   @unique
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model Purchase{
+  id            Int    @id @default(autoincrement())
+  userId            Int
+  bookId            Int
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId],references: [id], onDelete: Cascade)
 }
